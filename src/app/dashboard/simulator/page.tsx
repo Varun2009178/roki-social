@@ -21,6 +21,7 @@ export default function SimulatorPage() {
     const timestamp = new Date().toLocaleTimeString();
     setLogs(prev => [...prev, `[${timestamp}] OUTBOUND (${phone}): ${message}`]);
 
+
     try {
         const res = await fetch('/api/twilio-webhook', {
             method: 'POST',
@@ -31,9 +32,14 @@ export default function SimulatorPage() {
             })
         });
         
-        const data = await res.text(); // Twilio returns XML usually, but our mock might return JSON or XML
-        // For visual, let's just log the response status
-        setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] INBOUND (Bot): ${res.status === 200 ? "OK - Processed" : "Error"}`]);
+
+        const data = await res.text();
+        
+        // Parse TwiML to get the message text (support newlines with [\s\S])
+        const match = data.match(/<Message>([\s\S]*?)<\/Message>/);
+        const botReply = match ? match[1] : (res.status === 200 ? "OK - No Reply" : "Error");
+
+        setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] INBOUND (Bot): ${botReply}`]);
         setMessage("");
 
     } catch (err) {
@@ -78,19 +84,24 @@ export default function SimulatorPage() {
                     </div>
                     
                     <div className="flex-1 overflow-y-auto py-8 space-y-4">
+
                          {/* Fake Chat History */}
                          <div className="flex justify-start">
                              <div className="bg-zinc-200 text-black px-4 py-2 rounded-2xl rounded-tl-sm text-sm max-w-[80%]">
                                  im roki. who dis?
                              </div>
                          </div>
-                         {logs.filter(l => l.includes("OUTBOUND")).map((l, i) => (
-                             <div key={i} className="flex justify-end">
-                                 <div className="bg-blue-500 text-white px-4 py-2 rounded-2xl rounded-tr-sm text-sm max-w-[80%]">
-                                     {l.split('): ')[1]}
-                                 </div>
-                             </div>
-                         ))}
+                         {logs.map((l, i) => {
+                             const isOutbound = l.includes("OUTBOUND");
+                             const content = l.split('): ')[1];
+                             return (
+                                <div key={i} className={`flex ${isOutbound ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`${isOutbound ? 'bg-blue-500 text-white rounded-tr-sm' : 'bg-zinc-200 text-black rounded-tl-sm'} px-4 py-2 rounded-2xl text-sm max-w-[80%]`}>
+                                        {content}
+                                    </div>
+                                </div>
+                             );
+                         })}
                     </div>
 
                     {/* Input */}

@@ -19,6 +19,8 @@ export interface Group {
     members: string[]; // List of phone numbers
     createdAt: string;
     status: 'pending' | 'active';
+    goal?: string;
+    deadline?: string;
 }
 
 // Helpers
@@ -69,6 +71,17 @@ export const db = {
 
         list: () => {
             return readGroups();
+        },
+
+        update: (id: string, updates: Partial<Group>) => {
+            const groups = readGroups();
+            const index = groups.findIndex(g => g.id === id);
+            if (index !== -1) {
+                groups[index] = { ...groups[index], ...updates };
+                writeGroups(groups);
+                return groups[index];
+            }
+            return null;
         }
     }
 };

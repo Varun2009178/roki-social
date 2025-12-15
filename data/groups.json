@@ -1,26 +1,14 @@
 [
   {
-    "id": "95t25qlk",
-    "name": "chess gods",
-    "code": "6466",
-    "members": [],
-    "createdAt": "2025-12-14T19:35:53.980Z",
-    "status": "pending"
-  },
-  {
-    "id": "7di0zaxq",
-    "name": "jkljlkl",
-    "code": "1047",
-    "members": [],
-    "createdAt": "2025-12-15T01:53:25.159Z",
-    "status": "pending"
-  },
-  {
-    "id": "v8z4jk5o",
-    "name": "fdsfsdafas",
-    "code": "3310",
-    "members": [],
-    "createdAt": "2025-12-15T03:16:17.767Z",
-    "status": "pending"
+    "id": "a2o4845j",
+    "name": "sauad ",
+    "code": "3976",
+    "members": [
+      "+15550109999"
+    ],
+    "createdAt": "2025-12-15T21:17:57.827Z",
+    "status": "active",
+    "goal": "all of us are going to go to the gym every single day",
+    "deadline": "2025-12-22T05:59:00.000Z"
   }
 ]
