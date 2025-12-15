@@ -20,7 +20,12 @@ export default function RootLayout({
       <body
         className={`${inter.className} antialiased bg-black text-white`}
       >
+
         {children}
+        <footer className="fixed bottom-2 right-4 z-50 flex gap-4 pointer-events-none mix-blend-difference">
+            <a href="/privacy" className="text-[10px] text-zinc-600 hover:text-zinc-400 pointer-events-auto lowercase">privacy</a>
+            <a href="/terms" className="text-[10px] text-zinc-600 hover:text-zinc-400 pointer-events-auto lowercase">terms</a>
+        </footer>
       </body>
     </html>
   );
