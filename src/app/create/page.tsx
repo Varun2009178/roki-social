@@ -12,6 +12,7 @@ export default function CreateGroupPage() {
 
   const [groupName, setGroupName] = useState("");
   const [groupCode, setGroupCode] = useState("");
+  const [botNumber, setBotNumber] = useState("");
   const [copied, setCopied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -29,6 +30,7 @@ export default function CreateGroupPage() {
         
         if (data.success) {
             setGroupCode(data.group.code);
+            setBotNumber(data.botNumber);
         }
     } catch (e) {
         console.error(e);
@@ -38,7 +40,7 @@ export default function CreateGroupPage() {
   };
 
   const handleCopyNumber = () => {
-    navigator.clipboard.writeText("+15550107654");
+    navigator.clipboard.writeText(botNumber || "(555) 010-7654");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
@@ -110,8 +112,8 @@ export default function CreateGroupPage() {
                             <div className="space-y-1">
                                 <h3 className="font-bold lowercase">Create Group Chat</h3>
                                 <p className="text-sm text-zinc-400 lowercase leading-relaxed">
-                                    Start a new chat (iMessage, WhatsApp, etc) with your friends. 
-                                    <span className="text-zinc-500 ml-1">(min 2 people)</span>
+                                    Start a new chat (iMessage, WhatsApp, or SMS) with your friends. 
+                                    <span className="text-zinc-500 ml-1">(note: this will be an sms/green bubble thread)</span>
                                 </p>
                             </div>
                         </div>
@@ -126,7 +128,7 @@ export default function CreateGroupPage() {
                                 </p>
                                 <div className="flex items-center gap-2">
                                      <code className="bg-black border border-zinc-800 px-3 py-2 rounded-lg text-lg font-mono text-white flex-1 text-center">
-                                        (555) 010-7654
+                                        {botNumber || "(555) 010-7654"}
                                      </code>
                                      <Button size="icon" variant="outline" className="h-11 w-11 shrink-0 border-zinc-800" onClick={handleCopyNumber}>
                                         {copied ? <Check className="h-4 w-4 text-green-500"/> : <Copy className="h-4 w-4"/>}
@@ -145,7 +147,7 @@ export default function CreateGroupPage() {
                                     Text this unique code to bind your group:
                                 </p>
                                 <div className="bg-gradient-to-br from-orange-500 to-red-600 p-4 rounded-xl text-center shadow-lg shadow-orange-900/20">
-                                     <span className="font-mono text-3xl font-bold tracking-widest text-white">START {groupCode}</span>
+                                     <span className="font-mono text-3xl font-bold tracking-widest text-white uppercase">roki {groupCode}</span>
                                 </div>
                             </div>
                         </div>

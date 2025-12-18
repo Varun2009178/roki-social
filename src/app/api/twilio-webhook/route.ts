@@ -41,8 +41,8 @@ export async function POST(req: Request) {
             reply = "commands:\n• roki [code]: join a squad\n• status: check deadline & score\n• done: submit proof (attach photo)\n• stop: opt out";
         }
 
-        // --- ACTIVATION / JOIN (roki [CODE]) ---
-        else if (text.startsWith("roki ") && text.length < 20) {
+        // --- ACTIVATION / JOIN (roki [CODE] or start [CODE]) ---
+        else if ((text.startsWith("roki ") || text.startsWith("start ")) && text.length < 20) {
             intent = 'ACTIVATION';
             const code = text.split(" ")[1];
             const group = await db.groups.findByCode(code);

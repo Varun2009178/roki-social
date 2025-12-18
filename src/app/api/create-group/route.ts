@@ -1,6 +1,7 @@
 
 import { NextResponse } from "next/server";
 import { db } from "@/lib/storage";
+import { RO_KI_PHONE } from "@/lib/twilio";
 
 export async function POST(req: Request) {
     try {
@@ -14,7 +15,8 @@ export async function POST(req: Request) {
 
         return NextResponse.json({
             success: true,
-            group
+            group,
+            botNumber: RO_KI_PHONE || "(555) 000-0000"
         });
     } catch (error) {
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
