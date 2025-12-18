@@ -1,7 +1,6 @@
 
 "use client";
 
-import { FloatingNav } from "@/components/ui/floating-navbar";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { ArrowRight, Flame, MessageSquare, Plus, Copy, Check } from "lucide-react";
@@ -47,7 +46,7 @@ export default function CreateGroupPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-black text-white selection:bg-white selection:text-black font-sans">
-      <FloatingNav />
+
       <main className="flex-1 flex flex-col items-center justify-center px-4 pt-20">
         
         <div className="w-full max-w-lg">

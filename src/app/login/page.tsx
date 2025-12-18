@@ -1,12 +1,11 @@
 
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { FloatingNav } from "@/components/ui/floating-navbar";
 
 export default function LoginPage() {
   return (
     <main className="min-h-screen bg-black flex flex-col items-center justify-center p-4">
-      <FloatingNav />
+
       <div className="w-full max-w-sm space-y-8 pt-20">
         <div className="flex flex-col items-center space-y-2">
             <Link href="/">

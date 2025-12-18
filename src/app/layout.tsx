@@ -2,6 +2,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { FloatingNav } from "@/components/ui/floating-navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,7 +21,7 @@ export default function RootLayout({
       <body
         className={`${inter.className} antialiased bg-black text-white`}
       >
-
+        <FloatingNav />
         {children}
         <footer className="fixed bottom-2 right-4 z-50 flex gap-4 pointer-events-none mix-blend-difference">
             <a href="/privacy" className="text-[10px] text-zinc-600 hover:text-zinc-400 pointer-events-auto lowercase">privacy</a>

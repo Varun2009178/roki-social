@@ -9,7 +9,6 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle2, Flame, Users, ShieldAlert, ArrowRight, Terminal } from "lucide-react";
-import { FloatingNav } from "@/components/ui/floating-navbar";
 import { IMessageDemo } from "@/components/ui/imessage-demo";
 
 export default function Home() {
@@ -30,12 +29,12 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-black text-white selection:bg-white selection:text-black font-sans">
       {/* High Tech Centered Navigation */}
-      <FloatingNav />
+
 
 
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-visible">
+        <section id="hero" className="relative min-h-[85vh] flex flex-col items-center justify-center overflow-visible">
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-4xl mx-auto text-center space-y-8">
               <div className="inline-flex items-center justify-center gap-2 px-3 py-1 rounded-full border border-zinc-800 bg-zinc-950/50 backdrop-blur-xl mb-4">

@@ -45,18 +45,24 @@ export async function POST(req: Request) {
         else if ((text.startsWith("roki ") || text.startsWith("start ")) && text.length < 20) {
             intent = 'ACTIVATION';
             const code = text.split(" ")[1];
+            console.log(`[Twilio Webhook] Searching for group with code: ${code}`);
             const group = await db.groups.findByCode(code);
 
             if (group) {
-                // Add user if not already in (simulate joining the group chat)
-                // In real generic SMS, this binds this number to the group
-                if (!group.members.some((m: string) => m.includes(From) || From.includes(m))) {
+                console.log(`[Twilio Webhook] Found group: ${group.name} (ID: ${group.id})`);
+                // Add user if not already in
+                const normalizedFrom = From.replace(/\D/g, '');
+                const isMember = group.members.some((m: string) => m.replace(/\D/g, '').includes(normalizedFrom));
+
+                if (!isMember) {
                     group.members.push(From);
                     await db.groups.update(group.id, { members: group.members });
+                    console.log(`[Twilio Webhook] Added ${From} to group ${group.name}`);
                 }
-                reply = `squad found.\nreply "roki" to join.`;
+                reply = `squad found: ${group.name}.\nreply "roki" to join the chat.`;
             } else {
-                reply = "invalid code.";
+                console.log(`[Twilio Webhook] No group found for code: ${code}`);
+                reply = "invalid code. make sure you typed it correctly from the website.";
             }
         }
 
@@ -151,9 +157,12 @@ export async function POST(req: Request) {
             });
         }
 
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    } catch (error: any) {
+        console.error("Webhook Error:", error);
+        const errorMessage = error.message || "unknown error";
+        return new NextResponse(`<Response><Message>roki error: ${errorMessage}</Message></Response>`, {
+            headers: { 'Content-Type': 'text/xml' }
+        });
     }
 }
 
