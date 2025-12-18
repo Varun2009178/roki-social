@@ -10,9 +10,11 @@ import { cn } from "@/lib/utils";
 import { Flame } from "lucide-react";
 import { Button } from "./button";
 
+
 const navItems = [
   { name: "how it works", link: "/#how-it-works" },
   { name: "features", link: "/features" },
+  { name: "login", link: "/login" },
 ];
 
 export function FloatingNav() {
@@ -44,39 +46,37 @@ export function FloatingNav() {
           <span className="hidden md:inline text-sm font-bold tracking-tight lowercase text-white">róki</span>
         </Link>
         
-        <nav className="flex items-center relative gap-0.5 md:gap-1 shrink-0">
+
+        <nav className="flex items-center relative gap-0.5 shrink-0">
           {navItems.map((item) => (
             <Link
               key={item.name}
               href={item.link}
               onClick={() => setActiveTab(item.name)}
               className={cn(
-                "relative px-2 py-1.5 md:px-6 md:py-2 text-[9px] md:text-sm font-medium lowercase transition-colors z-10 whitespace-nowrap",
-                activeTab === item.name ? "text-white" : "text-zinc-400 hover:text-white"
+                "relative px-2 py-1.5 md:px-6 md:py-2 text-[10px] md:text-sm font-medium lowercase transition-colors z-10 whitespace-nowrap",
+                activeTab === item.name ? "text-white" : "text-zinc-400 hover:text-white",
+                // Hide 'login' on remarkably small screens if needed, or just let it fit
+                item.name === "login" ? "hidden sm:block" : ""
               )}
             >
-              {activeTab === item.name && (
-                <motion.div
-                  className="absolute inset-0 bg-white/10 rounded-full -z-10"
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                />
-              )}
-              {item.name}
+              {item.name === "how it works" ? <span className="md:hidden">how</span> : null}
+              {item.name === "how it works" ? <span className="hidden md:inline">how it works</span> : null}
+              {item.name !== "how it works" && item.name}
             </Link>
           ))}
         </nav>
 
         <div className="flex items-center gap-1 pl-0.5 md:pl-2 shrink-0">
+            {/* "Login" is now part of navItems, so removed from here */}
 
-            <Link href="/login">
-                <Button variant="ghost" className="h-7 md:h-9 rounded-full px-2 md:px-4 text-[9px] md:text-xs text-zinc-400 hover:text-white hover:bg-white/5 lowercase">
-                    login
-                </Button>
-            </Link>
+
+            {/* Text Róki (CTA) */}
             <Link href="/create">
-                <Button className="h-7 md:h-9 rounded-full bg-white px-2.5 md:px-6 text-[9px] md:text-xs font-semibold text-black hover:bg-zinc-200 lowercase whitespace-nowrap">
-                    enter róki
-                </Button>
+                <button className="border text-xs font-medium relative border-neutral-200 dark:border-white/[0.2] text-black dark:text-white px-2.5 py-1.5 rounded-full z-50 hover:bg-white/10 transition-colors whitespace-nowrap">
+                  <span className="text-[10px] sm:text-xs">text róki</span>
+                  <span className="absolute inset-x-0 w-1/2 mx-auto -bottom-px bg-gradient-to-r from-transparent via-blue-500 to-transparent  h-px" />
+                </button>
             </Link>
         </div>
 

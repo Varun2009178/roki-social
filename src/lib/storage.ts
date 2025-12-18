@@ -1,87 +1,72 @@
+import { supabase } from './supabase';
 
-import fs from 'fs';
-import path from 'path';
-
-// Simple file-based storage for MVP
-const DB_PATH = path.join(process.cwd(), 'data');
-const GROUPS_FILE = path.join(DB_PATH, 'groups.json');
-
-// Ensure data directory exists
-if (!fs.existsSync(DB_PATH)) {
-    fs.mkdirSync(DB_PATH, { recursive: true });
-}
-
-// Interfaces
+// Interfaces (Keep these for type safety)
 export interface Group {
     id: string;
     name: string;
-    code: string; // Unique 4-digit code for SMS binding
-    members: string[]; // List of phone numbers
-    createdAt: string;
+    code: string;
+    members: string[]; // JSONB or Array type in Supabase
+    created_at?: string;
     status: 'pending' | 'active';
     goal?: string;
     deadline?: string;
+    weekly_progress?: Record<string, { verified: boolean; last_seen: string }>; // Track per member
 }
 
-// Helpers
-function readGroups(): Group[] {
-    if (!fs.existsSync(GROUPS_FILE)) return [];
-    const data = fs.readFileSync(GROUPS_FILE, 'utf-8');
-    try {
-        return JSON.parse(data);
-    } catch (e) {
-        return [];
-    }
-}
-
-function writeGroups(groups: Group[]) {
-    fs.writeFileSync(GROUPS_FILE, JSON.stringify(groups, null, 2));
-}
-
-// API
+// API Wrapper utilizing Supabase
 export const db = {
     groups: {
-        create: (name: string) => {
-            const groups = readGroups();
+        create: async (name: string) => {
+            // Generate a unique 4 digit code (simple random for now)
+            const code = Math.floor(1000 + Math.random() * 9000).toString();
 
-            // Generate a unique 4 digit code
-            let code: string;
-            do {
-                code = Math.floor(1000 + Math.random() * 9000).toString();
-            } while (groups.find(g => g.code === code));
+            const { data, error } = await supabase
+                .from('groups')
+                .insert({
+                    name,
+                    code,
+                    members: [],
+                    status: 'pending'
+                })
+                .select()
+                .single();
 
-            const newGroup: Group = {
-                id: Math.random().toString(36).substring(2, 10),
-                name,
-                code,
-                members: [],
-                createdAt: new Date().toISOString(),
-                status: 'pending'
-            };
-
-            groups.push(newGroup);
-            writeGroups(groups);
-            return newGroup;
-        },
-
-        findByCode: (code: string) => {
-            const groups = readGroups();
-            return groups.find(g => g.code === code);
-        },
-
-        list: () => {
-            return readGroups();
-        },
-
-        update: (id: string, updates: Partial<Group>) => {
-            const groups = readGroups();
-            const index = groups.findIndex(g => g.id === id);
-            if (index !== -1) {
-                groups[index] = { ...groups[index], ...updates };
-                writeGroups(groups);
-                return groups[index];
+            if (error) {
+                console.error("Supabase Create Error:", error);
+                throw error;
             }
-            return null;
+            return data as Group;
+        },
+
+        findByCode: async (code: string) => {
+            const { data, error } = await supabase
+                .from('groups')
+                .select('*')
+                .eq('code', code)
+                .maybeSingle(); // Use maybeSingle to avoid 406 error if not found
+
+            return data as Group | null;
+        },
+
+        list: async () => {
+            const { data, error } = await supabase
+                .from('groups')
+                .select('*');
+
+            if (error) console.error(error);
+            return (data || []) as Group[];
+        },
+
+        update: async (id: string, updates: Partial<Group>) => {
+            const { data, error } = await supabase
+                .from('groups')
+                .update(updates)
+                .eq('id', id)
+                .select()
+                .single();
+
+            if (error) console.error("Update Error:", error);
+            return data as Group | null;
         }
     }
 };

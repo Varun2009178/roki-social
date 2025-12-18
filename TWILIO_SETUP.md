@@ -57,10 +57,6 @@ When you deploy to Vercel, `ngrok` is no longer needed.
 
 ## 📝 Important Code Notes
 - The current `/api/twilio-webhook` returns basic XML (`TwiML`) which Twilio understands.
-- **Database**: Currently, the app uses a temporary file-based DB (`/data/groups.json`).
-  - **Warning**: On Vercel (serverless), **files are not persistent**. Your groups will vanish after a few minutes.
-  - **Fix**: Before going to production, you MUST connect a real database like **Supabase** or **Postgres**.
-
-### Quick Supabase Switch (For Later)
-1. Set up a Supabase project.
-2. Replace `src/lib/storage.ts` logic to read/write from Supabase instead of `fs` (file system).
+- **Database**: The app has been migrated from a local file-based DB to **Supabase**.
+  - **Status**: Migration logic is implemented in `src/lib/storage.ts`.
+  - **Setup**: Follow the instructions in `MIGRATION.md` to set up your Supabase tables and RLS before going live.

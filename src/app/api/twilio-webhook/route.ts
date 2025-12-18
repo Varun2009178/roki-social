@@ -2,6 +2,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/lib/storage";
 import { generateRefereeResponse, analyzeEvidence } from "@/lib/ai";
+import { getSevenDaysFromNow } from "@/lib/utils";
 
 // Types
 type MessageType = 'ACTIVATION' | 'GOAL_SETTING' | 'CHECK_IN' | 'STATUS_CHECK' | 'UNKNOWN';
@@ -44,14 +45,14 @@ export async function POST(req: Request) {
         else if (text.startsWith("roki ") && text.length < 20) {
             intent = 'ACTIVATION';
             const code = text.split(" ")[1];
-            const group = db.groups.findByCode(code);
+            const group = await db.groups.findByCode(code);
 
             if (group) {
                 // Add user if not already in (simulate joining the group chat)
                 // In real generic SMS, this binds this number to the group
-                if (!group.members.some(m => m.includes(From) || From.includes(m))) {
+                if (!group.members.some((m: string) => m.includes(From) || From.includes(m))) {
                     group.members.push(From);
-                    db.groups.update(group.id, { members: group.members });
+                    await db.groups.update(group.id, { members: group.members });
                 }
                 reply = `squad found.\nreply "roki" to join.`;
             } else {
@@ -61,16 +62,16 @@ export async function POST(req: Request) {
 
         // --- CONTEXTUAL COMMANDS ---
         else {
-            const groups = db.groups.list();
+            const groups = await db.groups.list();
             // Loose matching for phone numbers
-            const myGroup = groups.find(g => g.members?.some(m => m.includes(From) || From.includes(m)));
+            const myGroup = groups.find((g: any) => g.members?.some((m: string) => m.includes(From) || From.includes(m)));
 
             if (myGroup) {
                 // JOIN / CONFIRMATION (Accepts "roki", "roki join", "im in")
                 if (text === 'roki' || text.includes('join') || text.includes("i'm in") || text.includes("im in")) {
                     // Set status to active if pending
                     if (myGroup.status !== 'active') {
-                        db.groups.update(myGroup.id, { status: 'active' });
+                        await db.groups.update(myGroup.id, { status: 'active' });
                         // Re-fetch to comply with type safety if needed, or just know it's active
                         myGroup.status = 'active';
                     }
@@ -87,9 +88,9 @@ export async function POST(req: Request) {
                 else if (myGroup.status === 'active' && !myGroup.goal) {
                     // This message MUST be the goal
                     intent = 'GOAL_SETTING';
-                    db.groups.update(myGroup.id, {
+                    await db.groups.update(myGroup.id, {
                         goal: text,
-                        deadline: getNextSunday()
+                        deadline: getSevenDaysFromNow()
                     });
 
                     // AI Response for Goal
@@ -106,8 +107,12 @@ export async function POST(req: Request) {
                         reply = analysis.comment;
 
                         if (analysis.passed) {
-                            // Update streak logic here (mock)
-                            // db.groups.updateStreak(...) 
+                            const currentProgress = myGroup.weekly_progress || {};
+                            currentProgress[From] = {
+                                verified: true,
+                                last_seen: new Date().toISOString()
+                            };
+                            await db.groups.update(myGroup.id, { weekly_progress: currentProgress });
                         }
                     } else {
                         reply = "photo proof required.";
@@ -152,11 +157,6 @@ export async function POST(req: Request) {
     }
 }
 
-// Helper
-function getNextSunday() {
-    const d = new Date();
-    d.setDate(d.getDate() + (7 - d.getDay()));
-    d.setHours(23, 59, 0, 0);
-    return d.toISOString();
-}
+
+
 

@@ -10,7 +10,7 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Group name is required" }, { status: 400 });
         }
 
-        const group = db.groups.create(groupName);
+        const group = await db.groups.create(groupName);
 
         return NextResponse.json({
             success: true,
