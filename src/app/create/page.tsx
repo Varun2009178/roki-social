@@ -146,9 +146,20 @@ export default function CreateGroupPage() {
                                 <p className="text-sm text-zinc-400 lowercase leading-relaxed">
                                     Text this unique code to bind your group:
                                 </p>
-                                <div className="bg-gradient-to-br from-orange-500 to-red-600 p-4 rounded-xl text-center shadow-lg shadow-orange-900/20">
-                                     <span className="font-mono text-3xl font-bold tracking-widest text-white uppercase">roki {groupCode}</span>
-                                </div>
+                                 <div className="bg-gradient-to-br from-orange-500 to-red-600 p-4 rounded-xl text-center shadow-lg shadow-orange-900/20 mb-4">
+                                      <span className="font-mono text-3xl font-bold tracking-widest text-white uppercase">roki {groupCode}</span>
+                                 </div>
+                                 <Button 
+                                    className="w-full h-12 rounded-full border-zinc-800 bg-white text-black hover:bg-zinc-200 transition-colors lowercase font-bold"
+                                    onClick={() => {
+                                        const cleanNumber = botNumber.replace(/\D/g, '');
+                                        const isIOS = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
+                                        const sep = isIOS ? '&' : '?';
+                                        window.location.href = `sms:${cleanNumber}${sep}body=roki%20${groupCode}`;
+                                    }}
+                                 >
+                                    <MessageSquare className="mr-2 h-4 w-4" /> open messages
+                                 </Button>
                             </div>
                         </div>
                     </div>
