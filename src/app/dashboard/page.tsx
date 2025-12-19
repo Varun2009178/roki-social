@@ -41,7 +41,7 @@ export default function DashboardPage() {
                      <p className="text-zinc-500 lowercase">manage your squad and subscription.</p>
                 </div>
                 <div className="flex items-center gap-2">
-                     <span className="text-sm text-zinc-400 lowercase">varun@example.com</span>
+                     <span className="text-sm text-zinc-400 lowercase">varun@teyra.app</span>
                      <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-zinc-800">
                         <LogOut className="h-4 w-4 text-zinc-500" />
                      </Button>

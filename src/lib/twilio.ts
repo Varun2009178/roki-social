@@ -19,11 +19,17 @@ export async function sendSMS(to: string, body: string) {
     }
 
     try {
+        // Handle WhatsApp prefixing automatically
+        const isWhatsApp = RO_KI_PHONE?.startsWith('whatsapp:');
+        const finalFrom = RO_KI_PHONE;
+        const finalTo = (isWhatsApp && !to.startsWith('whatsapp:')) ? `whatsapp:${to}` : to;
+
         await twilioClient.messages.create({
             body,
-            from: RO_KI_PHONE,
-            to
+            from: finalFrom,
+            to: finalTo
         });
+        console.log(`[Twilio SMS] Sent to ${finalTo}`);
     } catch (error) {
         console.error("Twilio Send Error:", error);
     }

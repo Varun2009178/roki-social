@@ -172,21 +172,28 @@ export async function POST(req: Request) {
         if (reply) {
             // Simple escape for XML safety
             const escapedReply = reply.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-            return new NextResponse(`<Response><Message>${escapedReply}</Message></Response>`, {
-                headers: { 'Content-Type': 'text/xml' }
+            const twiml = `<?xml version="1.0" encoding="UTF-8"?><Response><Message>${escapedReply}</Message></Response>`;
+
+            console.log(`[Twilio Webhook] Outgoing TwiML: ${twiml}`);
+
+            return new Response(twiml, {
+                status: 200,
+                headers: { 'Content-Type': 'text/xml; charset=utf-8' }
             });
         } else {
             // Silent
-            return new NextResponse(`<Response></Response>`, {
-                headers: { 'Content-Type': 'text/xml' }
+            return new Response(`<?xml version="1.0" encoding="UTF-8"?><Response></Response>`, {
+                status: 200,
+                headers: { 'Content-Type': 'text/xml; charset=utf-8' }
             });
         }
 
     } catch (error: any) {
         console.error("Webhook Error:", error);
         const errorMessage = error.message || "unknown error";
-        return new NextResponse(`<Response><Message>roki error: ${errorMessage}</Message></Response>`, {
-            headers: { 'Content-Type': 'text/xml' }
+        return new Response(`<?xml version="1.0" encoding="UTF-8"?><Response><Message>roki error: ${errorMessage}</Message></Response>`, {
+            status: 200,
+            headers: { 'Content-Type': 'text/xml; charset=utf-8' }
         });
     }
 }
