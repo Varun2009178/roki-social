@@ -1,8 +1,10 @@
-
 import { NextResponse } from "next/server";
 import { db } from "@/lib/storage";
 import { generateRefereeResponse, analyzeEvidence } from "@/lib/ai";
 import { getSevenDaysFromNow } from "@/lib/utils";
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 // Types
 type MessageType = 'ACTIVATION' | 'GOAL_SETTING' | 'CHECK_IN' | 'STATUS_CHECK' | 'UNKNOWN';
