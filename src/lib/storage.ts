@@ -43,8 +43,20 @@ export const db = {
                 .from('groups')
                 .select('*')
                 .eq('code', code)
-                .maybeSingle(); // Use maybeSingle to avoid 406 error if not found
+                .maybeSingle();
 
+            return data as Group | null;
+        },
+
+        findByMember: async (phone: string) => {
+            // Search in the members JSONB array
+            const { data, error } = await supabase
+                .from('groups')
+                .select('*')
+                .contains('members', [phone])
+                .maybeSingle();
+
+            if (error) console.error("findByMember Error:", error);
             return data as Group | null;
         },
 

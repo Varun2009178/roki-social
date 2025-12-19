@@ -7,6 +7,13 @@ import { getSevenDaysFromNow } from "@/lib/utils";
 // Types
 type MessageType = 'ACTIVATION' | 'GOAL_SETTING' | 'CHECK_IN' | 'STATUS_CHECK' | 'UNKNOWN';
 
+export async function GET() {
+    return new NextResponse("Róki Webhook is active. Use POST for Twilio messages.", {
+        status: 200,
+        headers: { 'Content-Type': 'text/plain' }
+    });
+}
+
 export async function POST(req: Request) {
     try {
         // 1. Check content type to parse correctly (TwiML vs JSON for simulator)
@@ -27,7 +34,14 @@ export async function POST(req: Request) {
         // Twilio Media Logic
         const mediaUrl = body.MediaUrl0 || body.mediaUrl; // Real Twilio uses MediaUrl0, Simulator uses mediaUrl
 
-        console.log(`[Twilio Webhook]From: ${From}, Body: ${text}, Media: ${mediaUrl ? 'Yes' : 'No'} `);
+        console.log(`[Twilio Webhook] From: ${From || 'UNKNOWN'}, Body: "${text}", Media: ${mediaUrl ? 'Yes' : 'No'} `);
+
+        if (!From) {
+            console.error("[Twilio Webhook] Received request without 'From' number. Body:", body);
+            return new NextResponse(`<Response><Message>roki: error - missing phone number</Message></Response>`, {
+                headers: { 'Content-Type': 'text/xml' }
+            });
+        }
 
         // 2. Determine Intent
         let intent: MessageType = 'UNKNOWN';
@@ -41,10 +55,11 @@ export async function POST(req: Request) {
             reply = "commands:\n• roki [code]: join a squad\n• status: check deadline & score\n• done: submit proof (attach photo)\n• stop: opt out";
         }
 
-        // --- ACTIVATION / JOIN (roki [CODE] or start [CODE]) ---
-        else if ((text.startsWith("roki ") || text.startsWith("start ")) && text.length < 20) {
+        // --- ACTIVATION / JOIN (roki [CODE] or start [CODE] or just [CODE]) ---
+        const isFourDigitCode = /^\d{4}$/.test(text);
+        if (((text.startsWith("roki ") || text.startsWith("start ")) && text.length < 20) || isFourDigitCode) {
             intent = 'ACTIVATION';
-            const code = text.split(" ")[1];
+            const code = isFourDigitCode ? text : text.split(" ")[1];
             console.log(`[Twilio Webhook] Searching for group with code: ${code}`);
             const group = await db.groups.findByCode(code);
 
@@ -60,6 +75,9 @@ export async function POST(req: Request) {
                     console.log(`[Twilio Webhook] Added ${From} to group ${group.name}`);
                 }
                 reply = `squad found: ${group.name}.\nreply "roki" to join the chat.`;
+            } else if (isFourDigitCode) {
+                // If they sent digits but it's not a valid code, don't stay silent
+                reply = "invalid code. make sure you typed it correctly from the website.";
             } else {
                 console.log(`[Twilio Webhook] No group found for code: ${code}`);
                 reply = "invalid code. make sure you typed it correctly from the website.";
@@ -68,9 +86,7 @@ export async function POST(req: Request) {
 
         // --- CONTEXTUAL COMMANDS ---
         else {
-            const groups = await db.groups.list();
-            // Loose matching for phone numbers
-            const myGroup = groups.find((g: any) => g.members?.some((m: string) => m.includes(From) || From.includes(m)));
+            const myGroup = await db.groups.findByMember(From);
 
             if (myGroup) {
                 // JOIN / CONFIRMATION (Accepts "roki", "roki join", "im in")
@@ -137,6 +153,11 @@ export async function POST(req: Request) {
                 else if (!reply) {
                     reply = await generateRefereeResponse(text, `User sent message. Goal: "${myGroup.goal}". NO photo attached. If they claim completion, demand proof.`);
                 }
+            } else {
+                // Not in a group and didn't trigger activation
+                if (!reply) {
+                    reply = "you aren't in a squad yet. text 'roki [code]' to join.";
+                }
             }
         }
 
@@ -147,7 +168,9 @@ export async function POST(req: Request) {
         }
 
         if (reply) {
-            return new NextResponse(`<Response><Message>${reply}</Message></Response>`, {
+            // Simple escape for XML safety
+            const escapedReply = reply.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return new NextResponse(`<Response><Message>${escapedReply}</Message></Response>`, {
                 headers: { 'Content-Type': 'text/xml' }
             });
         } else {
