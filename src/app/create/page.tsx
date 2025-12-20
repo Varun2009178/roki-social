@@ -15,6 +15,15 @@ export default function CreateGroupPage() {
   const [copied, setCopied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const formatPhoneNumber = (num: string) => {
+    if (!num) return "(844) 459-4193";
+    const cleaned = num.replace(/\D/g, '');
+    if (cleaned.length === 11 && cleaned.startsWith('1')) {
+      return `(${cleaned.slice(1, 4)}) ${cleaned.slice(4, 7)}-${cleaned.slice(7)}`;
+    }
+    return num;
+  };
+
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!groupName) return;
@@ -39,10 +48,10 @@ export default function CreateGroupPage() {
   };
 
   const handleCopyNumber = () => {
-    navigator.clipboard.writeText(botNumber || "(555) 010-7654");
+    navigator.clipboard.writeText(botNumber || "+18444594193");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
-  }
+  };
 
   return (
     <div className="flex min-h-screen flex-col bg-black text-white selection:bg-white selection:text-black font-sans">
@@ -126,8 +135,8 @@ export default function CreateGroupPage() {
                                     Add this phone number to the group:
                                 </p>
                                 <div className="flex items-center gap-2">
-                                     <code className="bg-black border border-zinc-800 px-3 py-2 rounded-lg text-lg font-mono text-white flex-1 text-center">
-                                        {botNumber || "(555) 010-7654"}
+                                     <code className="bg-black border border-zinc-800 px-3 py-2 rounded-lg text-lg font-mono text-white flex-1 text-center lowercase">
+                                        {formatPhoneNumber(botNumber)}
                                      </code>
                                      <Button size="icon" variant="outline" className="h-11 w-11 shrink-0 border-zinc-800" onClick={handleCopyNumber}>
                                         {copied ? <Check className="h-4 w-4 text-green-500"/> : <Copy className="h-4 w-4"/>}
@@ -151,7 +160,7 @@ export default function CreateGroupPage() {
                                  <Button 
                                     className="w-full h-12 rounded-full border-zinc-800 bg-white text-black hover:bg-zinc-200 transition-colors lowercase font-bold"
                                     onClick={() => {
-                                        const cleanNumber = botNumber.replace(/\D/g, '');
+                                        const cleanNumber = (botNumber || "+18444594193").replace(/\D/g, '');
                                         const isIOS = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
                                         const sep = isIOS ? '&' : '?';
                                         window.location.href = `sms:${cleanNumber}${sep}body=roki%20${groupCode}`;
